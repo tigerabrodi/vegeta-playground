@@ -1,4 +1,12 @@
-import { useState, useRef, useEffect, FormEvent } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  FormEvent,
+  KeyboardEvent,
+  useCallback,
+} from "react";
+import debounce from "lodash.debounce";
 import "./App.css";
 
 const ARRAY_SUGGESTIONS = [
@@ -10,7 +18,9 @@ const ARRAY_SUGGESTIONS = [
 ];
 
 export function App() {
-  const [text, setText] = useState<string>("Vegeta's playground");
+  const [text, setText] = useState("Vegeta's playground");
+  const [suggestionIndex, setSuggestionIndex] = useState(0);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const editableRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
@@ -19,10 +29,40 @@ export function App() {
     }
   }, []);
 
+  // Create a debounced function to handle showing suggestions
+  const handleShowSuggestions = useCallback(
+    debounce(() => {
+      if (text) {
+        setShowSuggestions(true);
+        setSuggestionIndex(0);
+      }
+    }, 500),
+    [text] // Re-create this function when 'text' changes
+  );
+
+  function resetSuggestion() {
+    setShowSuggestions(false);
+    setSuggestionIndex(0);
+  }
+
   const handleInput = (event: FormEvent<HTMLSpanElement>) => {
     const newText = event.currentTarget.textContent || "";
-    console.log("New text:", newText);
     setText(newText);
+    resetSuggestion();
+    handleShowSuggestions();
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLSpanElement>) => {
+    if (event.key === "ArrowRight" && showSuggestions) {
+      if (event.shiftKey) {
+        setSuggestionIndex(
+          (prevIndex) => (prevIndex + 1) % ARRAY_SUGGESTIONS.length
+        );
+      } else {
+        setText(text + ARRAY_SUGGESTIONS[suggestionIndex]);
+        setShowSuggestions(false);
+      }
+    }
   };
 
   return (
@@ -35,8 +75,17 @@ export function App() {
             className="editable-text"
             ref={editableRef}
             onInput={handleInput}
+            onKeyDown={handleKeyDown}
           />
-          {!text && <span className="placeholder">Type something...</span>}
+          {!text && !showSuggestions && (
+            <span className="placeholder">Type something...</span>
+          )}
+          {showSuggestions && text && (
+            <span className="suggestions">
+              {" "}
+              {ARRAY_SUGGESTIONS[suggestionIndex]}
+            </span>
+          )}
         </span>
       </div>
     </main>
