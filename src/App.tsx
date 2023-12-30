@@ -9,18 +9,11 @@ import {
 import debounce from "lodash.debounce";
 import "./App.css";
 
-const ARRAY_SUGGESTIONS = [
-  "The sun set over the horizon, painting the sky with hues of orange and pink. A gentle breeze rustled the leaves of the nearby trees.",
-  "In the heart of the bustling city, the sound of traffic filled the air. Street vendors called out, offering a variety of local delicacies.",
-  "The library was a haven of quiet, filled with the musty scent of old books. Students sat at scattered tables, lost in their studies.",
-  "High atop the mountain, the view was breathtaking. The vast landscape stretched out below, a mosaic of colors and textures.",
-  "The old clock tower chimed the hour, its sound echoing through the cobblestone streets. People hurried along, wrapped up in their daily routines.",
-];
-
 export function App() {
   const [text, setText] = useState("Vegeta's playground");
   const [suggestionIndex, setSuggestionIndex] = useState(0);
   const [shouldShowSuggestion, setShouldShowSuggestion] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const editableRef = useRef<HTMLSpanElement>(null);
   const latestTextRef = useRef("");
 
@@ -43,12 +36,49 @@ export function App() {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const updateSuggestionsVisibility = useCallback(
-    debounce(() => {
+    debounce(async () => {
       const hasUserStoppedTyping =
         latestTextRef.current === editableRef.current?.textContent;
       if (hasUserStoppedTyping) {
-        setShouldShowSuggestion(true);
+        // Fetch suggestions from GPT 4 API
+
+        const prompt = `This is my current text: "${text}"\n\nI want you to give me 5 suggestions to continue this text. Each suggestion should be two sentences. If the current text is not a completed sentence, then each suggestion should complete the sentence and then add 2 more sentences. So all in all, we would have 5 suggestions, each with 2 sentences or 2 sentences and completing the current text if the last sentence is incomplete.Enter your suggestions like:\n\n1. "first suggestion" 2. "second suggestion" 3. "third suggestion" 4. "fourth suggestion" 5. "fifth suggestion"\n\n`;
+
+        const payload = {
+          model: "gpt-4-1106-preview",
+          messages: [
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+          temperature: 0.5,
+          frequency_penalty: 0.5,
+          presence_penalty: 0.5,
+          max_tokens: 4000,
+        };
+
+        try {
+          console.log("fetching suggestions");
+          const response = await fetch(
+            "https://api.openai.com/v1/chat/completions",
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${import.meta.env.VITE_OPEN_API_KEY}`,
+              },
+              method: "POST",
+              body: JSON.stringify(payload),
+            }
+          );
+
+          console.log(response);
+        } catch (error) {
+          console.error(error);
+        }
+
         setSuggestionIndex(0);
+        setShouldShowSuggestion(true);
       } else {
         setShouldShowSuggestion(false);
       }
@@ -67,14 +97,11 @@ export function App() {
   const handleKeyDown = (event: KeyboardEvent<HTMLSpanElement>) => {
     if (event.key === "ArrowRight" && shouldShowSuggestion) {
       if (event.shiftKey) {
-        setSuggestionIndex(
-          (prevIndex) => (prevIndex + 1) % ARRAY_SUGGESTIONS.length
-        );
+        setSuggestionIndex((prevIndex) => (prevIndex + 1) % suggestions.length);
       } else {
         const currentText = editableRef.current?.textContent || "";
-        setText(currentText + ARRAY_SUGGESTIONS[suggestionIndex]);
-        latestTextRef.current =
-          currentText + ARRAY_SUGGESTIONS[suggestionIndex]; // Update latest text ref
+        setText(currentText + suggestions[suggestionIndex]);
+        latestTextRef.current = currentText + suggestions[suggestionIndex]; // Update latest text ref
         setShouldShowSuggestion(false);
       }
     }
@@ -96,9 +123,7 @@ export function App() {
             <span className="placeholder">Type something...</span>
           )}
           {shouldShowSuggestion && text && (
-            <span className="placeholder">
-              {ARRAY_SUGGESTIONS[suggestionIndex]}
-            </span>
+            <span className="placeholder">{suggestions[suggestionIndex]}</span>
           )}
         </span>
       </div>
