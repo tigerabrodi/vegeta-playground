@@ -22,24 +22,35 @@ export function App() {
   const [suggestionIndex, setSuggestionIndex] = useState(0);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const editableRef = useRef<HTMLSpanElement>(null);
-  const currentInputValue = useRef(""); // Ref to track current input value for debouncing
+  const latestTextRef = useRef("");
 
   useEffect(() => {
     if (editableRef.current) {
       editableRef.current.textContent = text;
+      moveCursorToEnd(editableRef.current);
     }
-  }, []);
+  }, [text]);
 
-  // useCallback is required for debounce to work
+  const moveCursorToEnd = (element: HTMLElement) => {
+    const range = document.createRange();
+    const selection = window.getSelection();
+    if (!selection) return;
+    range.selectNodeContents(element);
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  };
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const updateSuggestionsVisibility = useCallback(
     debounce(() => {
       const hasUserStoppedTyping =
-        currentInputValue.current &&
-        currentInputValue.current === editableRef.current?.textContent;
+        latestTextRef.current === editableRef.current?.textContent;
       if (hasUserStoppedTyping) {
         setShowSuggestions(true);
         setSuggestionIndex(0);
+      } else {
+        setShowSuggestions(false);
       }
     }, 800),
     []
@@ -48,9 +59,9 @@ export function App() {
   const handleInput = (event: FormEvent<HTMLSpanElement>) => {
     const newText = event.currentTarget.textContent || "";
     setText(newText);
+    latestTextRef.current = newText; // Update the latest text ref
     setShowSuggestions(false);
-    currentInputValue.current = newText;
-    updateSuggestionsVisibility(); // Call debounced function on every input
+    updateSuggestionsVisibility();
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLSpanElement>) => {
@@ -60,7 +71,10 @@ export function App() {
           (prevIndex) => (prevIndex + 1) % ARRAY_SUGGESTIONS.length
         );
       } else {
-        setText(text + ARRAY_SUGGESTIONS[suggestionIndex]);
+        const currentText = editableRef.current?.textContent || "";
+        setText(currentText + ARRAY_SUGGESTIONS[suggestionIndex]);
+        latestTextRef.current =
+          currentText + ARRAY_SUGGESTIONS[suggestionIndex]; // Update latest text ref
         setShowSuggestions(false);
       }
     }
@@ -83,7 +97,6 @@ export function App() {
           )}
           {showSuggestions && text && (
             <span className="placeholder">
-              {" "}
               {ARRAY_SUGGESTIONS[suggestionIndex]}
             </span>
           )}
