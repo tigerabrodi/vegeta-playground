@@ -20,7 +20,7 @@ const ARRAY_SUGGESTIONS = [
 export function App() {
   const [text, setText] = useState("Vegeta's playground");
   const [suggestionIndex, setSuggestionIndex] = useState(0);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [shouldShowSuggestion, setShouldShowSuggestion] = useState(false);
   const editableRef = useRef<HTMLSpanElement>(null);
   const latestTextRef = useRef("");
 
@@ -47,10 +47,10 @@ export function App() {
       const hasUserStoppedTyping =
         latestTextRef.current === editableRef.current?.textContent;
       if (hasUserStoppedTyping) {
-        setShowSuggestions(true);
+        setShouldShowSuggestion(true);
         setSuggestionIndex(0);
       } else {
-        setShowSuggestions(false);
+        setShouldShowSuggestion(false);
       }
     }, 800),
     []
@@ -60,12 +60,12 @@ export function App() {
     const newText = event.currentTarget.textContent || "";
     setText(newText);
     latestTextRef.current = newText; // Update the latest text ref
-    setShowSuggestions(false);
+    setShouldShowSuggestion(false);
     updateSuggestionsVisibility();
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLSpanElement>) => {
-    if (event.key === "ArrowRight" && showSuggestions) {
+    if (event.key === "ArrowRight" && shouldShowSuggestion) {
       if (event.shiftKey) {
         setSuggestionIndex(
           (prevIndex) => (prevIndex + 1) % ARRAY_SUGGESTIONS.length
@@ -75,7 +75,7 @@ export function App() {
         setText(currentText + ARRAY_SUGGESTIONS[suggestionIndex]);
         latestTextRef.current =
           currentText + ARRAY_SUGGESTIONS[suggestionIndex]; // Update latest text ref
-        setShowSuggestions(false);
+        setShouldShowSuggestion(false);
       }
     }
   };
@@ -92,10 +92,10 @@ export function App() {
             onInput={handleInput}
             onKeyDown={handleKeyDown}
           />
-          {!text && !showSuggestions && (
+          {!text && !shouldShowSuggestion && (
             <span className="placeholder">Type something...</span>
           )}
-          {showSuggestions && text && (
+          {shouldShowSuggestion && text && (
             <span className="placeholder">
               {ARRAY_SUGGESTIONS[suggestionIndex]}
             </span>
