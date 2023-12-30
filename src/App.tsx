@@ -22,6 +22,7 @@ export function App() {
   const [suggestionIndex, setSuggestionIndex] = useState(0);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const editableRef = useRef<HTMLSpanElement>(null);
+  const currentInputValue = useRef(""); // Ref to track current input value for debouncing
 
   useEffect(() => {
     if (editableRef.current) {
@@ -29,27 +30,27 @@ export function App() {
     }
   }, []);
 
-  // Create a debounced function to handle showing suggestions
-  const handleShowSuggestions = useCallback(
+  // useCallback is required for debounce to work
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const updateSuggestionsVisibility = useCallback(
     debounce(() => {
-      if (text) {
+      const hasUserStoppedTyping =
+        currentInputValue.current &&
+        currentInputValue.current === editableRef.current?.textContent;
+      if (hasUserStoppedTyping) {
         setShowSuggestions(true);
         setSuggestionIndex(0);
       }
-    }, 500),
-    [text] // Re-create this function when 'text' changes
+    }, 800),
+    []
   );
-
-  function resetSuggestion() {
-    setShowSuggestions(false);
-    setSuggestionIndex(0);
-  }
 
   const handleInput = (event: FormEvent<HTMLSpanElement>) => {
     const newText = event.currentTarget.textContent || "";
     setText(newText);
-    resetSuggestion();
-    handleShowSuggestions();
+    setShowSuggestions(false);
+    currentInputValue.current = newText;
+    updateSuggestionsVisibility(); // Call debounced function on every input
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLSpanElement>) => {
@@ -81,7 +82,7 @@ export function App() {
             <span className="placeholder">Type something...</span>
           )}
           {showSuggestions && text && (
-            <span className="suggestions">
+            <span className="placeholder">
               {" "}
               {ARRAY_SUGGESTIONS[suggestionIndex]}
             </span>
