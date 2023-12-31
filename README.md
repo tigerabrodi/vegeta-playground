@@ -6,9 +6,9 @@ The AI will have three different suggestions.
 
 ## How to apply suggestions
 
-**To apply a suggestion, hit right arrow.
+**To apply a suggestion, hit right arrow.**
 
-To jump to next suggestion, hit shift + right arrow.**
+**To jump to next suggestion, hit shift + right arrow.**
 
 # Demo
 
