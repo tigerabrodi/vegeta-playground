@@ -1,6 +1,14 @@
 # Vegeta's Playground
 
-![image](https://github.com/narutosstudent/vegeta-playground/assets/49603590/1b8abb4d-3f91-4b8b-8e2d-1bb8b4bd7d2a)
+Enter text, stop typing and let AI help you become more productive.
+
+The AI will have three different suggestions.
+
+## How to apply suggestions
+
+**To apply a suggestion, hit right arrow.
+
+To jump to next suggestion, hit shift + right arrow.**
 
 # Demo
 
@@ -87,3 +95,7 @@ const moveCursorToEnd = (element: HTMLElement) => {
   selection.addRange(range);
 };
 ```
+
+# Vegeta
+
+![image](https://github.com/narutosstudent/vegeta-playground/assets/49603590/1b8abb4d-3f91-4b8b-8e2d-1bb8b4bd7d2a)
