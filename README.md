@@ -16,6 +16,10 @@ Discourages the model from repeating the same words. Higher the frequency penalt
 
 Discourages the model from introducing new topics or concepts it has already mentioned. Useful if you want the model to explore new ideas.
 
+## Tokens
+
+Models process text in chunks called tokens. 1 token is roughly 4 characters.
+
 # Code learnings
 
 ## Content Editable Elements
