@@ -4,6 +4,18 @@
 
 # AI Learnings
 
+## Temprature
+
+Controls the randomness of the next word. Higher the temprature, higher the randomness. Which means the ouput may be more creative. However, it may also be more nonsensical.
+
+## Frequency Pentalty
+
+Discourages the model from repeating the same words. Higher the frequency penalty, lower the chances of the model repeating the same words.
+
+## Presence Penalty
+
+Discourages the model from introducing new topics or concepts it has already mentioned. Useful if you want the model to explore new ideas.
+
 # Code learnings
 
 ## Content Editable Elements
