@@ -8,6 +8,7 @@ import {
 } from "react";
 import debounce from "lodash.debounce";
 import "./App.css";
+import { parseSuggestion } from "./parseSuggestion";
 
 export function App() {
   const [text, setText] = useState("Naruto is amazing.");
@@ -74,7 +75,7 @@ export function App() {
             }
           );
 
-          console.log("response", await response.json());
+          setSuggestions(parseSuggestion(await response.json()));
           setSuggestionIndex(0);
           setShouldShowSuggestion(true);
         } catch (error) {
@@ -108,6 +109,8 @@ export function App() {
       }
     }
   };
+
+  console.log("suggestions", suggestions);
 
   return (
     <main>
