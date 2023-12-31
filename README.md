@@ -2,13 +2,13 @@
 
 Enter text, stop typing and let AI help you become more productive.
 
-The AI will have three different suggestions.
+The AI will have three different suggestions at a time.
 
 ## How to apply suggestions
 
-**To apply a suggestion, hit right arrow.**
+- **To apply a suggestion, hit right arrow.**
 
-**To jump to next suggestion, hit shift + right arrow.**
+- **To jump to next suggestion, hit shift + right arrow.**
 
 # Demo
 
